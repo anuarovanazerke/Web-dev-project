@@ -1,0 +1,124 @@
+<section class="profile-shell">
+  <div class="profile-hero">
+    <div>
+      <p class="eyebrow"></p>
+      <h1>Build your beauty profile</h1>
+      <p class="lead">
+        Choose skin type, concern, allergens to avoid, and optionally upload a face photo for AI-assisted skincare analysis.
+      </p>
+    </div>
+    <div class="hero-note">
+      <p class="hello">Logged in as</p>
+      <strong>{{ username || 'user' }}</strong>
+      <span> Images, ingredient warnings, and allergen-aware recommendations are now part of the flow.</span>
+    </div>
+  </div>
+
+  <div class="profile-grid">
+    <form class="profile-card" (ngSubmit)="submitProfile()">
+      <h2>Manual preferences</h2>
+
+      <label>
+        Skin type
+        <select [(ngModel)]="skinType" name="skinType">
+          <option value="" disabled>Select your skin type</option>
+          @for (option of options.skin_types; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        Main concern
+        <select [(ngModel)]="skinProblem" name="skinProblem">
+          <option value="" disabled>Select your main concern</option>
+          @for (option of options.concerns; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </label>
+
+      <label>
+        Total budget
+        <input [(ngModel)]="budget" name="budget" inputmode="numeric" placeholder="Enter your budget" />
+      </label>
+
+      <div class="allergen-box">
+        <h3>Allergens to avoid</h3>
+        <div class="checkbox-grid">
+          @for (option of options.allergens; track option.value) {
+            <label class="check-row">
+              <input
+                type="checkbox"
+                [checked]="selectedAllergens.includes(option.value)"
+                (change)="toggleAllergen(option.value, $any($event.target).checked)"
+              />
+              <span>{{ option.label }}</span>
+            </label>
+          }
+        </div>
+      </div>
+
+      <label>
+        Face photo for AI analysis
+        <input type="file" accept="image/*" (change)="onFileSelected($event)" />
+      </label>
+
+      @if (imageName) {
+        <p class="file-name">Selected: {{ imageName }}</p>
+      }
+
+      @if (analysisStatus) {
+        <p class="info">{{ analysisStatus }}</p>
+      }
+
+      @if (errorMessage) {
+        <p class="error">{{ errorMessage }}</p>
+      }
+
+      @if (infoMessage) {
+        <p class="info">{{ infoMessage }}</p>
+      }
+
+      <button
+        type="submit"
+        [disabled]="loading || !budget.trim() || ((!skinType || !skinProblem) && !imageFile)"
+      >
+        {{ loading ? 'Processing...' : 'Get recommendations' }}
+      </button>
+    </form>
+
+    <aside class="insights-card">
+      <h3>Ingredient safety check</h3>
+      <p>Paste any INCI list to see dangerous ingredients and selected allergen matches.</p>
+      <textarea [(ngModel)]="ingredientText" name="ingredientText" rows="8" placeholder="Aqua, Glycerin, Fragrance, Alcohol Denat..."></textarea>
+      <button type="button" (click)="runIngredientCheck()">Check ingredients</button>
+
+      @if (ingredientResult) {
+        <div class="ingredient-result">
+          <p [class.safe]="ingredientResult.is_safe" [class.error]="!ingredientResult.is_safe">
+            {{ ingredientResult.is_safe ? 'No risky matches found.' : 'Warnings found in this ingredient list.' }}
+          </p>
+
+          @if (ingredientResult.dangerous_ingredients.length) {
+            <div class="result-block">
+              <h4>Dangerous or irritating ingredients</h4>
+              @for (item of ingredientResult.dangerous_ingredients; track item.name) {
+                <p><b>{{ item.name }}</b>: {{ item.danger }}</p>
+              }
+            </div>
+          }
+
+          @if (ingredientResult.allergen_alerts.length) {
+            <div class="result-block">
+              <h4>Allergen alerts</h4>
+              @for (item of ingredientResult.allergen_alerts; track item.allergen) {
+                <p><b>{{ item.label }}</b>: {{ item.matched_keywords.join(', ') }}</p>
+              }
+            </div>
+          }
+        </div>
+      }
+    </aside>
+  </div>
+</section>

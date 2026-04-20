@@ -1,0 +1,136 @@
+<section class="recommendations-shell">
+  <header class="summary-card">
+    <div>
+      <p class="eyebrow">Smart consultation</p>
+      <h1>Your recommended routine</h1>
+      <p class="summary-line">
+        Skin type: <b>{{ labelFor('skin_types', profile.skin_type || faceAnalysis?.analysis?.skin_type) }}</b>
+        | Concern: <b>{{ labelFor('concerns', profile.concern || faceAnalysis?.analysis?.concern) }}</b>
+        | Budget: <b>{{ profile.budget || faceAnalysis?.budget?.limit || 0 }}</b>
+      </p>
+      @if (profile.allergens?.length) {
+        <p class="summary-line">Avoiding allergens: <b>{{ profile.allergens?.join(', ') }}</b></p>
+      }
+    </div>
+
+    @if (matchMeta) {
+      <div class="budget-box">
+        <span>Selected total</span>
+        <strong>{{ matchMeta.total_price }}</strong>
+        <small>Remaining: {{ matchMeta.remaining_budget }}</small>
+      </div>
+    }
+  </header>
+
+  @if (faceAnalysis) {
+    <section class="analysis-card">
+      @if (faceAnalysis.analysis.ingredient_hints.length) {
+        <h2>Suggested actives</h2>
+        <div class="chip-row">
+          @for (hint of faceAnalysis.analysis.ingredient_hints; track hint) {
+            <span class="chip">{{ hint }}</span>
+          }
+        </div>
+      }
+    </section>
+  }
+
+  @if (errorMessage) {
+    <p class="error">{{ errorMessage }}</p>
+  }
+
+  @if (noticeMessage) {
+    <p class="notice">{{ noticeMessage }}</p>
+  }
+
+  <section class="section-block">
+    <div class="section-heading">
+      <h2>Recommended set</h2>
+      <p class="mini-status">Loaded recommendations: {{ recommendations.length }}</p>
+    </div>
+
+    @if (loading) {
+      <p>Loading recommendations...</p>
+    } @else if (!recommendations.length) {
+      <p class="notice">No recommended products were rendered for this profile yet.</p>
+    } @else {
+      <div class="grid">
+        @for (item of recommendations; track item.id) {
+          <article class="card" (click)="selectProduct(item)">
+            <img class="product-image" [src]="item.image_url" [alt]="item.name" />
+            <div class="card-top">
+              <span class="category-pill">{{ item.category }}</span>
+              <span class="price-pill">{{ item.price }}</span>
+            </div>
+            <h3>{{ item.brand }}</h3>
+            <h4>{{ item.name }}</h4>
+            <p>{{ item.description }}</p>
+            <small>{{ item.match_reason }}</small>
+          </article>
+        }
+      </div>
+    }
+  </section>
+
+  <section class="section-block">
+    <div class="section-heading">
+      <h2>Skincare catalog</h2>
+      <p class="mini-status">Loaded store products: {{ catalog.length }}</p>
+      <button type="button" (click)="loadFullCatalog()">Load full catalog</button>
+    </div>
+
+    @if (catalogLoading) {
+      <p>Loading store catalog...</p>
+    } @else if (catalogErrorMessage) {
+      <p class="error">{{ catalogErrorMessage }}</p>
+    } @else if (!catalog.length) {
+      <p class="notice">No store products are being rendered right now. Try "Load full catalog".</p>
+    } @else {
+      <div class="grid">
+        @for (item of catalog; track item.id) {
+          <article class="card secondary" (click)="selectProduct(item)">
+            <img class="product-image" [src]="item.image_url" [alt]="item.name" />
+            <div class="card-top">
+              <span class="category-pill">{{ item.category }}</span>
+              <span class="price-pill">{{ item.price }}</span>
+            </div>
+            <h3>{{ item.brand }}</h3>
+            <h4>{{ item.name }}</h4>
+            <p>{{ item.description }}</p>
+          </article>
+        }
+      </div>
+    }
+  </section>
+
+  @if (selectedProduct) {
+    <div class="modal-overlay" (click)="closeModal()">
+      <div class="modal-content" (click)="$event.stopPropagation()">
+        <div class="card-top">
+          <span class="category-pill">{{ selectedProduct.category }}</span>
+          <span class="price-pill">{{ selectedProduct.price }}</span>
+        </div>
+        <img class="product-image modal-image" [src]="selectedProduct.image_url" [alt]="selectedProduct.name" />
+        <h2>{{ selectedProduct.brand }} - {{ selectedProduct.name }}</h2>
+        <p>{{ selectedProduct.description }}</p>
+        @if (selectedProduct.ingredient_summary) {
+          <p class="reason"><b>Ingredients:</b> {{ selectedProduct.ingredient_summary }}</p>
+        }
+
+        @if (selectedProduct.concern_tags.length) {
+          <div class="chip-row">
+            @for (tag of selectedProduct.concern_tags; track tag) {
+              <span class="chip">{{ tag }}</span>
+            }
+          </div>
+        }
+
+        @if (selectedProduct.match_reason) {
+          <p class="reason"><b>Why it was chosen:</b> {{ selectedProduct.match_reason }}</p>
+        }
+
+        <button type="button" (click)="closeModal()">Close</button>
+      </div>
+    </div>
+  }
+</section>

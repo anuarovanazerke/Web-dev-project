@@ -1,0 +1,27 @@
+<div class="login-shell">
+  <div class="login-card">
+    <p class="eyebrow">AI skincare assistant</p>
+    <h2>Welcome back</h2>
+    <p class="subtitle">
+      Log in to upload a face photo, save your profile, and get a budget-aware skincare routine.
+    </p>
+
+    <label>
+      Username
+      <input [(ngModel)]="username" placeholder="Enter your username" />
+    </label>
+
+    <label>
+      Password
+      <input [(ngModel)]="password" type="password" placeholder="Enter your password" />
+    </label>
+
+    @if (errorMessage) {
+      <p class="error">{{ errorMessage }}</p>
+    }
+
+    <button type="button" (click)="login()" [disabled]="loading || !username || !password">
+      {{ loading ? 'Signing in...' : 'Login' }}
+    </button>
+  </div>
+</div>
