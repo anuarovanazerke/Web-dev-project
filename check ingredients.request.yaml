@@ -1,0 +1,11 @@
+$kind: http-request
+name: check ingredients
+url: http://127.0.0.1:8000/api/check-ingredients/
+method: POST
+body:
+  type: json
+  content: |-
+    {
+        "ingredients_text":"Aqua,Glycerin,Alcohol,Parabens"
+    }
+order: 4407759769447842

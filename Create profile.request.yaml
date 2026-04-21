@@ -1,0 +1,5 @@
+$kind: http-request
+name: Create profile
+url: http://127.0.0.1:8000/api/profile/
+method: POST
+order: 3419291803908298
